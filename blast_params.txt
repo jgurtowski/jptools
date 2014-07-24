@@ -1,0 +1,1 @@
+blastn -task blastn -db /seq/schatz/yeast/W303.pb.fa -query Yeast_R2.fa -outfmt 11 -word_size 11 -dust no -reward 5 -penalty -4 -gapopen 8 -gapextend 6 -max_target_seqs 1 -num_threads 16
