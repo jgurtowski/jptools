@@ -8,19 +8,22 @@ from collections import namedtuple
 
 from jbio.io.blast import Blast6SeqRecord, Blast6SeqTypes
 
-from ectools.misc import reverse_complement
-from ectools.seqio import fastaIterator
-from ectools.nucio import fileIterator, lineRecordIterator
+from jbio.misc import reverse_complement
+from jbio.sequence import fasta_iterator
+from jbio.io.file import iterator_over_file, line_record_iterator
+from jbio.io.blast import Blast6Record, Blast6Types
+from jbio.functional import compose
+
 from ectools.cov import getCoverageFromAlignments
 from ectools.log import logger
 
 from pbtools.pbdagcon.c_aligngraph import AlnGraph, convert_mismatches
 from pbtools.pbdagcon.q_sense import output_dag_info
 
-log = logger(sys.stderr)
-
 def correct_oxford(reads_fn=None, alignments_fn=None):
     '''Corrects oxford reads'''
+    
+    log = logger(sys.stderr)
     
     if not reads_fn or not alignments_blast6_fn:
         if not len(sys.argv) == 3:
@@ -29,19 +32,19 @@ def correct_oxford(reads_fn=None, alignments_fn=None):
 
         log("Reading raw reads into memory")
         #just put all reads in memory
-        raw_reads = dict(map(attrgetter("name","seq"), 
-                             fileIterator(reads_fn, fastaIterator)))
-
-        log("Reading raw reads DONE")
+        fastas = compose(fasta_iterator, iterator_over_file)(reads_fn)
+        raw_reads = dict(map(attrgetter("name","seq"), fastas))
+        
+        log("Reading raw reads DONE :)")
 
          #The alignments need to be sorted by the long read name (second column)
-        record_it = lambda fh : lineRecordIterator(fh, Blast6SeqRecord, Blast6SeqTypes)
-        file_it = fileIterator(alignments_fn, record_it)
-
+        alignment_it = line_record_iterator(Blast6SeqRecord, Blast6SeqTypes,
+                                            iterator_over_file(alignments_fn))
+        
         important_field_getter = attrgetter("qname","sname","qstart","qend",
                                             "sstart","send", "qseq", "sseq")
-
-        for readname, alignments in groupby(file_it, attrgetter("sname")):
+                                            
+        for readname, alignments in groupby(alignment_it, attrgetter("sname")):
             log("Working on %s" % readname)
             
             raw_read_seq = raw_reads.get(readname)
