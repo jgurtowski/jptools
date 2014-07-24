@@ -16,6 +16,15 @@ setup(name='jptools',
       license='GPL',
       packages=['jptools'],
       scripts=['scripts/f52fasta.py'],
+      install_requires = [
+        "h5py >= 2.3.1",
+        "jbio >= 0.1", 
+        "pbtools.pbdagcon >= 0.2.3",
+        ],
+      dependency_links = [
+        "git+https://github.com/jgurtowski/jbio#egg=jbio-0.1",
+        "git+https://github.com/PacificBiosciences/pbdagcon#egg=pbtools.pbdagcon-0.2.3"
+        ],
       entry_points = {
         'console_scripts': [
             'coverageFromBlast6 = jptools.coverage:coverage_from_blast6',
