@@ -14,8 +14,7 @@ from jbio.io.file import iterator_over_file, line_record_iterator
 from jbio.io.blast import Blast6Record, Blast6Types
 from jbio.functional import compose
 
-from ectools.cov import getCoverageFromAlignments
-from ectools.log import logger
+from jbio.log import logger
 
 from pbtools.pbdagcon.c_aligngraph import AlnGraph, convert_mismatches
 from pbtools.pbdagcon.q_sense import output_dag_info
