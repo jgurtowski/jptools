@@ -36,7 +36,7 @@ def correct_oxford(reads_fn=None, alignments_fn=None):
         
         log("Reading raw reads DONE :)")
 
-         #The alignments need to be sorted by the long read name (second column)
+        #The alignments need to be sorted by the long read name (second column)
         alignment_it = line_record_iterator(Blast6SeqRecord, Blast6SeqTypes,
                                             iterator_over_file(alignments_fn))
         
