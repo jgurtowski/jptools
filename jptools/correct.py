@@ -17,7 +17,11 @@ from jbio.functional import compose
 from jbio.log import logger
 
 from pbtools.pbdagcon.c_aligngraph import AlnGraph, convert_mismatches
+#from pbtools.pbdagcon.aligngraph import AlnGraph, convert_mismatches
 from pbtools.pbdagcon.q_sense import output_dag_info
+
+
+TOO_MANY_ALIGNMENTS = 3000
 
 def correct_oxford(reads_fn=None, alignments_fn=None):
     '''Corrects oxford reads'''
@@ -33,7 +37,7 @@ def correct_oxford(reads_fn=None, alignments_fn=None):
         #just put all reads in memory
         fastas = compose(fasta_iterator, iterator_over_file)(reads_fn)
         raw_reads = dict(map(attrgetter("name","seq"), fastas))
-        
+
         log("Reading raw reads DONE :)")
 
         #The alignments need to be sorted by the long read name (second column)
@@ -52,7 +56,6 @@ def correct_oxford(reads_fn=None, alignments_fn=None):
                 continue
 
             log("Raw Read Length: %d" % len(raw_read_seq))    
-
             g = AlnGraph(raw_read_seq)
 
             alignments = imap(important_field_getter, alignments)
@@ -70,21 +73,31 @@ def correct_oxford(reads_fn=None, alignments_fn=None):
                     
                 (qseq, sseq) = convert_mismatches(qseq,sseq)
                 try:
-                    g.add_alignment( ((qstart, qend, qseq),
-                                      (sstart, send, sseq), qname))
+                    alignment_tuple =((qstart, qend, qseq),
+                                      (sstart, send, sseq), qname) 
+                    g.add_alignment( alignment_tuple)
                 except Exception as e:
                     log("Add Alignmented Error: %s" % e)
                     continue
-
+                if num_alignments > TOO_MANY_ALIGNMENTS:
+                    break
+                
                 num_alignments += 1
 
             log("Processed Alignments: %d" % num_alignments)
+            if num_alignments > TOO_MANY_ALIGNMENTS:
+                log("Too Many Alignments, Skipping")
+                continue
+            
             log("Generating Consensus")
-            consensus = g.generate_consensus(min_cov=0)[0]
+            consensus = g.generate_all_consensus(min_cov=0)[0]
             log("Consensus Length %d" % len(consensus))
             log("%s Done\n\n" % readname)
 
+            log("Output dag info")
+            output_dag_info(g, "g.info")
+
             print ">"+readname+"_consensus"
-            print consensus
+            print consensus[0]
 
 
