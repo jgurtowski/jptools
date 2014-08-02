@@ -28,7 +28,7 @@ setup(name='jptools',
         'console_scripts': [
             'coverageFromBlast6 = jptools.coverage:coverage_from_blast6',
             'correctOxford = jptools.correct:correct_oxford',
-            'blast6QFilter = jptools.blast:blast6qfilter_main',
+            'blast6Filter = jptools.blast:blast6filter_main',
             'fast5ToFasta = jptools.fast5:fast5ToFasta_main',
             ]
         },

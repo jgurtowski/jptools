@@ -91,7 +91,7 @@ def correct_oxford(reads_fn=None, alignments_fn=None):
             
             log("Generating Consensus")
             consensus = g.generate_all_consensus(min_cov=0)[0]
-            log("Consensus Length %d" % len(consensus))
+            log("Consensus Length %d" % len(consensus[0]))
             log("%s Done\n\n" % readname)
 
             log("Output dag info")
