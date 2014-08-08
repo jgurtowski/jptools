@@ -1,13 +1,12 @@
 from __future__ import print_function
-from itertools import chain, imap, tee, izip
+from itertools import chain, imap, tee, izip, cycle
 from functools import partial
 from operator import attrgetter, itemgetter
 
 from jbio.io.file import iterator_over_file, record_to_string
 from jbio.io.blast import record_iterator as blast_record_iterator
-from jbio.functional import compose
-from jbio.alignment import best_scoring_non_overlapping
-from jbio.alignment import group as alignment_grouper, LIS
+from jbio.functional import compose, zipmap
+from jbio.alignment import group as alignment_grouper, alignment_functions
 
 def blast6filter_main(cmdline_args = None):
     
@@ -16,24 +15,38 @@ def blast6filter_main(cmdline_args = None):
         cmdline_args = sys.argv
 
     if not len(cmdline_args) == 3:
-        return "blast6filter q/r input.blast6 -- Make sure input is sorted by q/r first"
+        return "blast6filter q/r_cons/r_noover input.blast6 -- Make sure input is sorted by q/r first"
     
     task,infile = cmdline_args[1:3]
 
     fileit = iterator_over_file(infile)
 
     alignment_getter = blast_record_iterator(fileit)
+
+    #
+    #grouped_alns = alignment_grouper(attrgetter("sname"), alignment_getter)
+    #aln_funcs = alignment_functions(attrgetter("sstart"), attrgetter("send"))
+    #filter(compose(print,record_to_string), chain.from_iterable(imap(partial(aln_funcs.greedy_repeat_filter,final_sort_key=attrgetter("pctid")), grouped_alns)))
+    #
+    #sys.exit(1)
     
-    grouped_alns = alignment_grouper(attrgetter("sname") if task == "r" else attrgetter("qname")
-                                     ,alignment_getter)
-    if task == "r":
-        best = imap(compose(partial(map,itemgetter(2)),partial(LIS,attrgetter("sstart"), attrgetter("send"), None)),
-                    grouped_alns)
+    if task.startswith("r"):
+        grouped_alns = alignment_grouper(attrgetter("sname"), alignment_getter)
+        aln_funcs = alignment_functions(attrgetter("sstart"), attrgetter("send"))
+        score_func = aln_funcs.score_getter_matching_consensus_estimated
+        greedy_repeat_filt = partial(aln_funcs.greedy_repeat_filter, final_sort_key=attrgetter("pctid"))
+        lis = compose(partial(aln_funcs.LIS, score_func), aln_funcs.remove_contained, greedy_repeat_filt)
+        if task == "r_noover":
+            score_func = aln_funcs.score_getter_penalize_overlap_estimated
+            lis = compose(partial(aln_funcs.LIS, score_func), aln_funcs.remove_contained)
+
     else:
-        best = imap(partial(best_scoring_non_overlapping,attrgetter("qstart"),
-                            attrgetter("qend"),
-                            attrgetter("bitscore")),
-                    grouped_alns)
+        grouped_alns = alignment_grouper(attrgetter("qname"), alignment_getter)
+        aln_funcs = alignment_functions(attrgetter("qstart"), attrgetter("qend"))
+        lis = compose(partial(aln_funcs.LIS,aln_funcs.score_getter_penalize_overlap_estimated), aln_funcs.remove_contained)
+        
+    best = imap(compose(partial(map,itemgetter(2)),lis), grouped_alns)        
+
     
     filter(print,imap(record_to_string, 
                       chain.from_iterable(best)))
