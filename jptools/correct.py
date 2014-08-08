@@ -94,8 +94,8 @@ def correct_oxford(reads_fn=None, alignments_fn=None):
             log("Consensus Length %d" % len(consensus[0]))
             log("%s Done\n\n" % readname)
 
-            log("Output dag info")
-            output_dag_info(g, "g.info")
+            #log("Output dag info")
+            #output_dag_info(g, "g.info")
 
             print ">"+readname+"_consensus"
             print consensus[0]
