@@ -9,7 +9,7 @@ from collections import namedtuple
 from jbio.io.blast import Blast6SeqRecord, Blast6SeqTypes
 
 from jbio.misc import reverse_complement
-from jbio.sequence import fasta_iterator
+from jbio.fasta import record_iterator as fasta_iterator
 from jbio.io.file import iterator_over_file, line_record_iterator
 from jbio.io.blast import Blast6Record, Blast6Types
 from jbio.functional import compose
@@ -21,7 +21,7 @@ from pbtools.pbdagcon.c_aligngraph import AlnGraph, convert_mismatches
 from pbtools.pbdagcon.q_sense import output_dag_info
 
 
-TOO_MANY_ALIGNMENTS = 3000
+TOO_MANY_ALIGNMENTS = 10000
 
 def correct_oxford(reads_fn=None, alignments_fn=None):
     '''Corrects oxford reads'''
