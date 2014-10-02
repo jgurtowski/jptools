@@ -55,7 +55,7 @@ def blast6filter_main(cmdline_args = None):
             lis = compose(partial(aln_funcs.LIS, score_func), aln_funcs.remove_contained)
             best = imap(compose(partial(map,itemgetter(2)),lis), grouped_alns)        
         if task =="r_experimental":
-            lis = greedy_repeat_filt
+            lis = compose(greedy_repeat_filt, remove_self)
             best = imap(lis, grouped_alns)
 
     else:
