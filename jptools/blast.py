@@ -50,6 +50,7 @@ def blast6filter_main(cmdline_args = None):
             return filtered
             
         lis = compose(partial(aln_funcs.LIS, score_func), aln_funcs.remove_contained, greedy_repeat_filt, remove_self)
+        best = imap(lis, grouped_alns)
         if task == "r_noover":
             score_func = aln_funcs.score_getter_penalize_overlap_estimated
             lis = compose(partial(aln_funcs.LIS, score_func), aln_funcs.remove_contained)

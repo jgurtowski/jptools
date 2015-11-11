@@ -18,10 +18,12 @@ setup(name='jptools',
       install_requires = [
         "h5py >= 2.3.1",
         "jbio >= 0.1", 
+        "pbcore >= 0.6.3",
         "pbtools.pbdagcon >= 0.2.3",
         ],
       dependency_links = [
         "git+https://github.com/jgurtowski/jbio#egg=jbio-0.1",
+        "git+https://github.com/PacificBiosciences/pbcore#egg=pbcore-0.6.3",
         "git+https://github.com/PacificBiosciences/pbdagcon#egg=pbtools.pbdagcon-0.2.3"
         ],
       entry_points = {
